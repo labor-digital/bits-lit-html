@@ -1,0 +1,10 @@
+node_modules
+dist
+
+
+# IDEA Code Style
+.idea/*
+!.idea/copyright/
+!.idea/copyright/*
+!.idea/codeStyles/
+!.idea/codeStyles/*
