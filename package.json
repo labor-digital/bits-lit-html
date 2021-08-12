@@ -1,6 +1,6 @@
 {
 	"name": "@labor-digital/bits-lit-html",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Plugin for the bits library to add lit-html integration",
 	"homepage": "https://bits.labor.tools/",
 	"license": "Apache-2.0",
