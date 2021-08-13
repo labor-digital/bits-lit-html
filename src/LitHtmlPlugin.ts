@@ -24,11 +24,10 @@ import type {ILitHtmlTemplateProvider} from './types';
 
 export class LitHtmlPlugin implements IBitPlugin
 {
-    /**
-     * @deprecated temporary marker until the next major version of the bits library
-     */
-    public _bitsLegacyIdentifier = 'litHtml';
     
+    /**
+     * @hidden
+     */
     public extendBits(inject: IBitPluginExtensionInjector): void
     {
         inject('html', function (
