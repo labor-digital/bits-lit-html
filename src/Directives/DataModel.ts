@@ -18,13 +18,65 @@
 
 import type {AbstractBit} from '@labor-digital/bits';
 import {setElementValue} from '@labor-digital/bits';
-import {directive, EventPart} from 'lit-html';
+import {noChange} from 'lit-html';
+import {AsyncDirective} from 'lit-html/async-directive.js';
+import {directive, Part, PartType} from 'lit-html/directive.js';
+// import {directive, EventPart} from 'lit-html';
 
 declare global
 {
     interface Element
     {
-        _bitHtmlListener?: boolean
+        _bitHtmlListener?: boolean;
+    }
+}
+
+class DataModelDirective extends AsyncDirective
+{
+    protected _part?: Part;
+    
+    public update(_part: Part, props: Array<unknown>): any
+    {
+        this._part = _part;
+        return super.update(_part, props);
+    }
+    
+    public render(property: string): unknown
+    {
+        this.registerHooks(property);
+        return noChange;
+    }
+    
+    protected registerHooks(property: string): void
+    {
+        if (!this._part || this._part.type !== PartType.EVENT) {
+            throw new Error(
+                'dataModel can only be used in event bindings! Use it like: @keyup="${dataModel(\'yourProperty\')}"');
+        }
+        
+        if (this._part.element._bitHtmlListener) {
+            return;
+        }
+        
+        let handler: Function = function () {};
+        this._part.element._bitHtmlListener = true;
+        this.setValue(function (e: any) {
+            handler(e);
+        });
+        
+        const bit: AbstractBit = this._part.options?.host as any;
+        bit.$context.binder.getAccessor(property).then(prop => {
+            if (prop === null || !this._part || this._part.type !== PartType.EVENT) {
+                return;
+            }
+            
+            const el = this._part.element as HTMLElement;
+            
+            setElementValue(this._part.element as HTMLElement, prop.get());
+            handler = function (e: UIEvent | KeyboardEvent) {
+                bit.$context.binder.reactToChangeEvent(e, el, prop);
+            };
+        });
     }
 }
 
@@ -44,30 +96,4 @@ declare global
  *   <input type="text" @keyup="${dataModel('data.model')}">
  * </label>
  */
-export const dataModel = directive((property: string) => async (part: any) => {
-    if (!(part instanceof EventPart)) {
-        throw new Error(
-            'dataModel can only be used in event bindings! Use it like: @keyup="${dataModel(\'yourProperty\')}"');
-    }
-    
-    if (part.element._bitHtmlListener) {
-        return;
-    }
-    
-    let handler: Function = function () {};
-    part.element._bitHtmlListener = true;
-    part.setValue(function (e) {
-        handler(e);
-    });
-    
-    const bit: AbstractBit = part.eventContext as any;
-    const prop = await bit.$context.binder.getAccessor(property);
-    if (prop === null) {
-        return;
-    }
-    
-    setElementValue(part.element as HTMLElement, prop.get());
-    handler = function (e: UIEvent | KeyboardEvent) {
-        bit.$context.binder.reactToChangeEvent(e, part.element as HTMLElement, prop);
-    };
-});
+export const dataModel = directive(DataModelDirective);

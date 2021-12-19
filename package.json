@@ -40,7 +40,7 @@
 		"@labor-digital/helferlein": "^4.4.1"
 	},
 	"dependencies": {
-		"lit-html": "^1.4.1"
+		"lit-html": "^2.0.2"
 	},
 	"devDependencies": {
 		"rimraf": "^3.0.2",

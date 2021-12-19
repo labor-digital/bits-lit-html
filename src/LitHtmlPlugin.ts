@@ -31,9 +31,9 @@ export class LitHtmlPlugin implements IBitPlugin
     public extendBits(inject: IBitPluginExtensionInjector): void
     {
         inject('html', function (
-            this: AbstractBit,
-            a: string | HTMLElement | ILitHtmlTemplateProvider,
-            b?: ILitHtmlTemplateProvider
+                this: AbstractBit,
+                a: string | HTMLElement | ILitHtmlTemplateProvider,
+                b?: ILitHtmlTemplateProvider
             ): IReactionDisposer {
                 const template: ILitHtmlTemplateProvider = b ?? a as any;
                 let target: string | HTMLElement | null = template === a ? this.$el : a as any;
@@ -48,7 +48,9 @@ export class LitHtmlPlugin implements IBitPlugin
                             render(
                                 ((template as any).call(this)),
                                 target as HTMLElement,
-                                {eventContext: this as any}
+                                {
+                                    host: this
+                                }
                             );
                         } catch (e) {
                             console.log('RENDERING ERROR', e);
